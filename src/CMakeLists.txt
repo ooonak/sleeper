@@ -14,7 +14,9 @@ file(WRITE ${PROJECT_BINARY_DIR}/sleeperconfig.hpp.in "
 #define sleeper_VERSION_PATCH @sleeper_VERSION_PATCH@
 ")
 
-# find_package()
+# https://raw.githubusercontent.com/facebookincubator/fizz/main/build/fbcode_builder/CMake/FindSodium.cmake
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR};${CMAKE_MODULE_PATH}")
+find_package(Sodium REQUIRED)
 
 add_library(sleeper
     include/sleeper/sleeper.hpp
@@ -29,17 +31,18 @@ target_include_directories(sleeper
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
     $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
     $<INSTALL_INTERFACE:include>
+    ${spdlog_SOURCE_DIR}/include
+    ${toml_SOURCE_DIR}
+    ${sodium_INCLUDE_DIR}
 )
 
-#target_link_libraries(sleeper
-#    PRIVATE
-#)
+target_link_libraries(sleeper
+    PRIVATE
+    spdlog::spdlog
+    ${sodium_LIBRARY_RELEASE}
+)
 
 add_library(sleeper::sleeper ALIAS sleeper)
-
-#set_target_properties(sleeper PROPERTIES PUBLIC_HEADER
-#    include/sleeper/sleeper.hpp
-#)
 
 configure_file("${PROJECT_BINARY_DIR}/sleeperconfig.hpp.in" sleeperconfig.hpp)
 

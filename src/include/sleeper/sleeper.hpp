@@ -11,7 +11,7 @@ class Sleeper
  public:
   static void version(std::tuple<int, int, int> &version);
 
-  static std::string version();
+  static void version();
 };
 
 }  // namespace slpr

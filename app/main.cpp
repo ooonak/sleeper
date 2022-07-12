@@ -4,7 +4,7 @@
 
 int main()
 {
-  std::cout << "libsleeper v" << slpr::Sleeper::version() << std::endl;
+  slpr::Sleeper::version();
 
   return 0;
 }

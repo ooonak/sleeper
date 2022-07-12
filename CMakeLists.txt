@@ -12,6 +12,22 @@ enable_iwyu()
 
 include(FetchContent)
 
+# MIT License
+FetchContent_Declare(
+    spdlog
+    URL https://github.com/gabime/spdlog/archive/refs/tags/v1.10.0.tar.gz
+    URL_HASH SHA256=697f91700237dbae2326b90469be32b876b2b44888302afbc7aceb68bcfe8224
+)
+
+# MIT License
+FetchContent_Declare(
+    toml
+    URL https://github.com/ToruNiina/toml11/archive/refs/tags/v3.7.1.tar.gz
+    URL_HASH SHA256=afeaa9aa0416d4b6b2cd3897ca55d9317084103077b32a852247d8efd4cf6068
+)
+
+FetchContent_MakeAvailable(spdlog toml)
+
 message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
