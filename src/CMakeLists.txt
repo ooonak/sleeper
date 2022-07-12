@@ -4,10 +4,7 @@ project(sleeper VERSION 0.0.1)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 include(snippets)
-
 enable_clang_tidy()
-enable_cppcheck()
-enable_iwyu()
 
 file(WRITE ${PROJECT_BINARY_DIR}/sleeperconfig.hpp.in "
 #pragma once

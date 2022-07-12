@@ -11,11 +11,16 @@ macro(enable_clang_tidy)
 endmacro()
 
 macro(enable_cppcheck)
-  find_program(clang_cppcheck_cmd NAMES "cppcheck")
-  if(NOT clang_cppcheck_cmd)
-    message(WARNING "Could not find cppcheck!")
-  else()
-    set(CMAKE_CXX_CPPCHECK "${clang_cppcheck_cmd}")
+  find_program(CMAKE_CXX_CPPCHECK NAMES cppcheck)
+  if (CMAKE_CXX_CPPCHECK)
+    list(
+        APPEND CMAKE_CXX_CPPCHECK
+            "--enable=all"
+            "--inconclusive"
+            "--force"
+            "--inline-suppr"
+            "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
+    )
   endif()
 endmacro()
 

@@ -7,9 +7,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 include(snippets)
-#enable_clang_tidy()
-#enable_cppcheck()
-#enable_iwyu()
+enable_cppcheck()
+enable_iwyu()
 
 include(FetchContent)
 
