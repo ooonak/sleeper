@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(sleeper LANGUAGES CXX)
 
-option(WITH_COVERAGE "Enable code coverage" OFF)
-
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -25,42 +23,70 @@ FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG release-1.12.1
-  #URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-  #URL_HASH SHA256=b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
 )
 
 FetchContent_MakeAvailable(googletest spdlog toml)
 
-message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-else()
-  set(CMAKE_VERBOSE_MAKEFILE ON)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O1")
-endif()
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Werror")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow -Wunused -Wnon-virtual-dtor -Woverloaded-virtual")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast -Wcast-qual -Wcast-align -Wsign-conversion")
-
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 include(snippets)
 
-if (WITH_COVERAGE)
-    message(STATUS "Enabling code coverage")
-    enable_coverage()
-endif()
-
-message(STATUS "Enabling static code analysis")
 enable_clang_tidy()
 enable_cppcheck()
 enable_iwyu()
 
-if (NOT WITH_COVERAGE)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wnull-dereference")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wshadow -Wunused -Wnon-virtual-dtor -Woverloaded-virtual")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wold-style-cast -Wcast-qual -Wcast-align -Wsign-conversion")
+
+if (${CMAKE_BUILD_TYPE} MATCHES "^[a-zA-Z]+san" AND NOT CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  message(FATAL_ERROR "${CMAKE_BUILD_TYPE} build type requires Clang compiler.")
+else()
+  set(SANITIZER_BUILD ON)
 endif()
 
-message(STATUS "Using CXX flags: ${CMAKE_CXX_FLAGS}")
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+else()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O1")
+endif()
+
+if(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+  # Nothing
+
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Coverage")
+    CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
+    if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+    else()
+      message(FATAL "No coverage instrumentation in your compiler, that we support!")
+    endif()
+
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Asan")
+  # https://clang.llvm.org/docs/AddressSanitizer.html
+  # leak detection is enabled by default on Linux.
+  set(SAN_FLAGS -fsanitize=address -fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope)
+
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Tsan")
+  # https://clang.llvm.org/docs/ThreadSanitizer.html
+  set(SAN_FLAGS -fsanitize=thread)
+
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Memsan")
+  # https://clang.llvm.org/docs/MemorySanitizer.html
+  set(SAN_FLAGS -fsanitize=memory -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-memory-track-origins)
+
+elseif(${CMAKE_BUILD_TYPE} STREQUAL "Ubsan")
+  # https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html
+  set(SAN_FLAGS -fsanitize=undefined,integer,nullability -fno-omit-frame-pointer -fsanitize-undefined-strip-path-components=2)
+
+endif()
+
+message(STATUS "CXX flags: ${CMAKE_CXX_FLAGS}")
 
 add_subdirectory(src)
 add_subdirectory(app)
@@ -68,4 +94,3 @@ add_subdirectory(app)
 include(CTest)
 enable_testing()
 add_subdirectory(test)
-

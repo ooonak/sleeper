@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(sleeper VERSION 0.0.1)
 
-#list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
-#include(snippets)
-
 file(WRITE ${PROJECT_BINARY_DIR}/sleeperconfig.hpp.in "
 #pragma once
 
@@ -21,6 +18,11 @@ add_library(sleeper
     include/sleeper/sleeper.hpp
     sleeper.cpp
 )
+
+if(SANITIZER_BUILD)
+  target_compile_options(sleeper PRIVATE ${SAN_FLAGS})
+  target_link_options(sleeper PRIVATE ${SAN_FLAGS})
+endif()
 
 target_compile_features(sleeper PUBLIC cxx_std_20)
 
