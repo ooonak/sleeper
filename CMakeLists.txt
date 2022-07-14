@@ -23,8 +23,10 @@ FetchContent_Declare(
 
 FetchContent_Declare(
   googletest
-  URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
-  URL_HASH SHA256=b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.12.1
+  #URL https://github.com/google/googletest/archive/refs/tags/release-1.11.0.tar.gz
+  #URL_HASH SHA256=b4870bf121ff7795ba20d20bcdd8627b8e088f2d1dab299a031c1034eddc93d5
 )
 
 FetchContent_MakeAvailable(googletest spdlog toml)
@@ -48,11 +50,14 @@ include(snippets)
 if (WITH_COVERAGE)
     message(STATUS "Enabling code coverage")
     enable_coverage()
-else()
-    message(STATUS "Enabling static code analysis")
-    enable_clang_tidy()
-    enable_cppcheck()
-    enable_iwyu()
+endif()
+
+message(STATUS "Enabling static code analysis")
+enable_clang_tidy()
+enable_cppcheck()
+enable_iwyu()
+
+if (NOT WITH_COVERAGE)
 endif()
 
 message(STATUS "Using CXX flags: ${CMAKE_CXX_FLAGS}")
