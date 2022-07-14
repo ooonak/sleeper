@@ -19,6 +19,8 @@ macro(enable_cppcheck)
             "--inconclusive"
             "--force"
             "--inline-suppr"
+            "--enable=information"
+            "--check-config"
             "--suppressions-list=${CMAKE_SOURCE_DIR}/CppCheckSuppressions.txt"
     )
   endif()
@@ -33,3 +35,13 @@ macro(enable_iwyu)
   endif()
 endmacro()
 
+macro(enable_coverage)
+  CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/CTestCustom.cmake ${CMAKE_BINARY_DIR}/CTestCustom.cmake @ONLY)
+  if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage -fprofile-abs-path")
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-instr-generate -fcoverage-mapping")
+  else()
+    message(FATAL "No coverage instrumentation in your compiler, that we support!")
+  endif()
+endmacro()

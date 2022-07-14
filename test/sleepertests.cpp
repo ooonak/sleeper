@@ -5,7 +5,7 @@
 
 TEST(Sleeper, TestVersion)
 {
-  std::tuple<int, int, int> v;
-  slpr::Sleeper::version(v);
-  EXPECT_EQ(std::get<0>(v), 0);
+  std::tuple<int, int, int> ver;
+  slpr::Sleeper::version(ver);
+  EXPECT_EQ(std::get<0>(ver), 0);
 }
