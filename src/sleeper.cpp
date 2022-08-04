@@ -1,10 +1,12 @@
 #include "sleeper/sleeper.hpp"
 
 #include <sodium.h>
-
+#include "nlohmann/json.hpp"
 #include "sleeperconfig.hpp"
 #include "spdlog/spdlog.h"
 #include "toml.hpp"
+#include <boost/asio.hpp>
+#include <openssl/opensslv.h>
 
 void slpr::Sleeper::version(std::tuple<int, int, int> &version)
 {
@@ -25,4 +27,7 @@ void slpr::Sleeper::version()
   spdlog::info("libsodium {} [ISC license, dynamically linked] {}",
                sodium_version_string(),
                "https://github.com/jedisct1/libsodium");
+  spdlog::info("Boost (v{}.{}.{}) Asio v{}.{}.{}", BOOST_VERSION / 100000, BOOST_VERSION / 100 % 1000, BOOST_VERSION % 100, BOOST_ASIO_VERSION / 100000, BOOST_ASIO_VERSION / 100 % 1000, BOOST_ASIO_VERSION % 100); // NOLINT
+  spdlog::info("nlohmann json v{}.{}.{}", NLOHMANN_JSON_VERSION_MAJOR, NLOHMANN_JSON_VERSION_MINOR, NLOHMANN_JSON_VERSION_PATCH);
+  spdlog::info(OPENSSL_VERSION_TEXT);
 }

@@ -20,12 +20,25 @@ FetchContent_Declare(
 )
 
 FetchContent_Declare(
+    json
+    URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
+    URL_HASH SHA256=344be97b757a36c5b180f1c8162f6c5f6ebd760b117f6e64b77866e97b217280
+)
+
+# https://www.boost.org/users/history/version_1_79_0.html
+FetchContent_Declare(
+    boost
+    URL https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
+    URL_HASH SHA256=273f1be93238a068aba4f9735a4a2b003019af067b9c183ed227780b8f36062c
+)
+
+FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
   GIT_TAG release-1.12.1
 )
 
-FetchContent_MakeAvailable(googletest spdlog toml)
+FetchContent_MakeAvailable(googletest spdlog toml json boost)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}")
 include(snippets)
@@ -70,7 +83,7 @@ elseif(${CMAKE_BUILD_TYPE} STREQUAL "Coverage")
 elseif(${CMAKE_BUILD_TYPE} STREQUAL "Asan")
   # https://clang.llvm.org/docs/AddressSanitizer.html
   # leak detection is enabled by default on Linux.
-  set(SAN_FLAGS -fsanitize=address -fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope)
+  set(SAN_FLAGS -fsanitize=address -fno-omit-frame-pointer -fsanitize-address-use-after-scope)
 
 elseif(${CMAKE_BUILD_TYPE} STREQUAL "Tsan")
   # https://clang.llvm.org/docs/ThreadSanitizer.html

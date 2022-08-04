@@ -13,6 +13,8 @@ file(WRITE ${PROJECT_BINARY_DIR}/sleeperconfig.hpp.in "
 # https://raw.githubusercontent.com/facebookincubator/fizz/main/build/fbcode_builder/CMake/FindSodium.cmake
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR};${CMAKE_MODULE_PATH}")
 find_package(Sodium REQUIRED)
+find_package(Threads REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 add_library(sleeper
     include/sleeper/sleeper.hpp
@@ -35,12 +37,17 @@ target_include_directories(sleeper
     ${spdlog_SOURCE_DIR}/include
     ${toml_SOURCE_DIR}
     ${sodium_INCLUDE_DIR}
+    ${boost_SOURCE_DIR}
+    ${OPENSSL_INCLUDE_DIR}
 )
 
 target_link_libraries(sleeper
     PRIVATE
     spdlog::spdlog
     ${sodium_LIBRARY_RELEASE}
+    nlohmann_json::nlohmann_json
+    Threads::Threads
+    ${OPENSSL_LIBRARIES}
 )
 
 add_library(sleeper::sleeper ALIAS sleeper)
